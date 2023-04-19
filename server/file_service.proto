@@ -1,0 +1,37 @@
+// python -m grpc_tools.protoc --python_out=. --pyi_out=. --grpc_python_out=. -I./ file_service.proto
+syntax = "proto3";
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  // Uploads a file
+  rpc UploadFile(File) returns (MetaData) {}
+  // Downloads a file
+  rpc DownloadFile(MetaData) returns  (File) {}
+
+  rpc RemoveFile(MetaData) returns (MetaData) {}
+
+  rpc GetFileList(FileListRequest) returns (FileListResponse) {}
+}
+
+
+message File {
+  MetaData meta = 1;
+  bytes chunk_data = 2;
+}
+
+message MetaData {
+  optional string bucket = 1;
+  string filename = 2;
+  string extension = 3;
+  // hash
+  // date
+}
+
+message FileListRequest {
+  string bucket = 1;
+}
+
+message FileListResponse {
+  repeated MetaData files = 1;
+}
