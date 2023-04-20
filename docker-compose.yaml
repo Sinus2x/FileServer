@@ -1,4 +1,6 @@
+#sudo chmod 666 /var/run/docker.sock
 version: '3.7'
+
 
 # Settings and configurations that are common for all containers
 x-minio-common: &minio-common
@@ -39,11 +41,11 @@ services:
 #    volumes:
 #      - redis-data:/data
 #      - redis-conf:/usr/local/etc/redis/redis.conf
-  server:
-    build: server/
-    expose:
-      - "50051"
-      - "50051"
+#  server:
+#    build: server/
+#    expose:
+#      - "50051"
+#      - "50051"
 
   minio1:
     <<: *minio-common

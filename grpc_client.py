@@ -3,7 +3,8 @@ from __future__ import print_function
 import logging
 
 import grpc
-from server import file_service_pb2, file_service_pb2_grpc
+import file_service_pb2
+import file_service_pb2_grpc
 
 
 def run():
@@ -13,17 +14,17 @@ def run():
     print("Will try to greet world ...")
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = file_service_pb2_grpc.GreeterStub(channel)
-        # download = stub.DownloadFile(file_service_pb2.MetaData(
-        #     bucket='test',
-        #     filename='code',
-        #     extension='txt'
-        # )
-        # )
-        # # print("Greeter client received: " + response.message)
-        # with open('download_response.txt', 'wb') as f:
-        #     f.write(download.chunk_data)
-        #
-        #
+        download = stub.DownloadFile(file_service_pb2.MetaData(
+            bucket='test',
+            filename='code',
+            extension='txt'
+        )
+        )
+        # print("Greeter client received: " + response.message)
+        with open('download_response1.txt', 'wb') as f:
+            f.write(download.chunk_data)
+
+
         # with open('test.txt', 'rb') as f:
         #     upload = stub.UploadFile(
         #         file_service_pb2.File(
