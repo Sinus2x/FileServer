@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x66ile_service.proto\"3\n\x04\x46ile\x12\x17\n\x04meta\x18\x01 \x01(\x0b\x32\t.MetaData\x12\x12\n\nchunk_data\x18\x02 \x01(\x0c\"O\n\x08MetaData\x12\x13\n\x06\x62ucket\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\x12\x11\n\textension\x18\x03 \x01(\tB\t\n\x07_bucket\"!\n\x0f\x46ileListRequest\x12\x0e\n\x06\x62ucket\x18\x01 \x01(\t\",\n\x10\x46ileListResponse\x12\x18\n\x05\x66iles\x18\x01 \x03(\x0b\x32\t.MetaData2\xab\x01\n\x07Greeter\x12 \n\nUploadFile\x12\x05.File\x1a\t.MetaData\"\x00\x12\"\n\x0c\x44ownloadFile\x12\t.MetaData\x1a\x05.File\"\x00\x12$\n\nRemoveFile\x12\t.MetaData\x1a\t.MetaData\"\x00\x12\x34\n\x0bGetFileList\x12\x10.FileListRequest\x1a\x11.FileListResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x66ile_service.proto\"A\n\x04\x46ile\x12\x1c\n\x04meta\x18\x01 \x01(\x0b\x32\t.MetaDataH\x00\x88\x01\x01\x12\x12\n\nchunk_data\x18\x02 \x01(\x0c\x42\x07\n\x05_meta\"B\n\x0b\x46ileRequest\x12\x0e\n\x06\x62ucket\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\x12\x11\n\textension\x18\x03 \x01(\t\"\x87\x01\n\x08MetaData\x12\x13\n\x06\x62ucket\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\x12\x11\n\textension\x18\x03 \x01(\t\x12\x11\n\x04hash\x18\x04 \x01(\tH\x01\x88\x01\x01\x12\x11\n\x04\x64\x61te\x18\x05 \x01(\tH\x02\x88\x01\x01\x42\t\n\x07_bucketB\x07\n\x05_hashB\x07\n\x05_date\"!\n\x0f\x46ileListRequest\x12\x0e\n\x06\x62ucket\x18\x01 \x01(\t\",\n\x10\x46ileListResponse\x12\x18\n\x05\x66iles\x18\x01 \x03(\x0b\x32\t.MetaData2\xd1\x01\n\x07Greeter\x12 \n\nUploadFile\x12\x05.File\x1a\t.MetaData\"\x00\x12\"\n\x0c\x44ownloadFile\x12\t.MetaData\x1a\x05.File\"\x00\x12$\n\nRemoveFile\x12\t.MetaData\x1a\t.MetaData\"\x00\x12\x34\n\x0bGetFileList\x12\x10.FileListRequest\x1a\x11.FileListResponse\"\x00\x12$\n\x07GetFile\x12\x0c.FileRequest\x1a\t.MetaData\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'file_service_pb2', globals())
@@ -21,13 +21,15 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _FILE._serialized_start=22
-  _FILE._serialized_end=73
-  _METADATA._serialized_start=75
-  _METADATA._serialized_end=154
-  _FILELISTREQUEST._serialized_start=156
-  _FILELISTREQUEST._serialized_end=189
-  _FILELISTRESPONSE._serialized_start=191
-  _FILELISTRESPONSE._serialized_end=235
-  _GREETER._serialized_start=238
-  _GREETER._serialized_end=409
+  _FILE._serialized_end=87
+  _FILEREQUEST._serialized_start=89
+  _FILEREQUEST._serialized_end=155
+  _METADATA._serialized_start=158
+  _METADATA._serialized_end=293
+  _FILELISTREQUEST._serialized_start=295
+  _FILELISTREQUEST._serialized_end=328
+  _FILELISTRESPONSE._serialized_start=330
+  _FILELISTRESPONSE._serialized_end=374
+  _GREETER._serialized_start=377
+  _GREETER._serialized_end=586
 # @@protoc_insertion_point(module_scope)

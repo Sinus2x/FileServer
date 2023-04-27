@@ -35,6 +35,11 @@ class GreeterStub(object):
                 request_serializer=file__service__pb2.FileListRequest.SerializeToString,
                 response_deserializer=file__service__pb2.FileListResponse.FromString,
                 )
+        self.GetFile = channel.unary_unary(
+                '/Greeter/GetFile',
+                request_serializer=file__service__pb2.FileRequest.SerializeToString,
+                response_deserializer=file__service__pb2.MetaData.FromString,
+                )
 
 
 class GreeterServicer(object):
@@ -68,6 +73,12 @@ class GreeterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetFile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GreeterServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -90,6 +101,11 @@ def add_GreeterServicer_to_server(servicer, server):
                     servicer.GetFileList,
                     request_deserializer=file__service__pb2.FileListRequest.FromString,
                     response_serializer=file__service__pb2.FileListResponse.SerializeToString,
+            ),
+            'GetFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetFile,
+                    request_deserializer=file__service__pb2.FileRequest.FromString,
+                    response_serializer=file__service__pb2.MetaData.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -167,5 +183,22 @@ class Greeter(object):
         return grpc.experimental.unary_unary(request, target, '/Greeter/GetFileList',
             file__service__pb2.FileListRequest.SerializeToString,
             file__service__pb2.FileListResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetFile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Greeter/GetFile',
+            file__service__pb2.FileRequest.SerializeToString,
+            file__service__pb2.MetaData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

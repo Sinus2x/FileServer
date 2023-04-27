@@ -25,7 +25,7 @@ class FileListResponse(_message.Message):
     files: _containers.RepeatedCompositeFieldContainer[MetaData]
     def __init__(self, files: _Optional[_Iterable[_Union[MetaData, _Mapping]]] = ...) -> None: ...
 
-class MetaData(_message.Message):
+class FileRequest(_message.Message):
     __slots__ = ["bucket", "extension", "filename"]
     BUCKET_FIELD_NUMBER: _ClassVar[int]
     EXTENSION_FIELD_NUMBER: _ClassVar[int]
@@ -34,3 +34,17 @@ class MetaData(_message.Message):
     extension: str
     filename: str
     def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ..., extension: _Optional[str] = ...) -> None: ...
+
+class MetaData(_message.Message):
+    __slots__ = ["bucket", "date", "extension", "filename", "hash"]
+    BUCKET_FIELD_NUMBER: _ClassVar[int]
+    DATE_FIELD_NUMBER: _ClassVar[int]
+    EXTENSION_FIELD_NUMBER: _ClassVar[int]
+    FILENAME_FIELD_NUMBER: _ClassVar[int]
+    HASH_FIELD_NUMBER: _ClassVar[int]
+    bucket: str
+    date: str
+    extension: str
+    filename: str
+    hash: str
+    def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ..., extension: _Optional[str] = ..., hash: _Optional[str] = ..., date: _Optional[str] = ...) -> None: ...

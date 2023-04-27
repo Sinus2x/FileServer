@@ -12,20 +12,28 @@ service Greeter {
   rpc RemoveFile(MetaData) returns (MetaData) {}
 
   rpc GetFileList(FileListRequest) returns (FileListResponse) {}
+
+  rpc GetFile(FileRequest) returns (MetaData) {}
 }
 
 
 message File {
-  MetaData meta = 1;
+  optional MetaData meta = 1;
   bytes chunk_data = 2;
+}
+
+message FileRequest {
+  string bucket = 1;
+  string filename = 2;
+  string extension = 3;
 }
 
 message MetaData {
   optional string bucket = 1;
   string filename = 2;
   string extension = 3;
-  // hash
-  // date
+  optional string hash = 4;
+  optional string date = 5;
 }
 
 message FileListRequest {

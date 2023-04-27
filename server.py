@@ -42,7 +42,7 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
         )
         return file_service_pb2.File(
             chunk_data=data.read(),
-            meta=request
+            # meta=request
         )
 
     def UploadFile(
@@ -57,10 +57,18 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
             data=data,
             length=data.getbuffer().nbytes
         )
+        meta = self.storage.stat_object(
+            bucket_name=request.meta.bucket,
+            object_name=f'{request.meta.filename}.{request.meta.extension}'
+        )
+        print(meta.last_modified)
+
         return file_service_pb2.MetaData(
             bucket=result.bucket_name,
             filename=result.object_name.split('.')[0],
-            extension=result.object_name.split('.')[1]
+            extension=result.object_name.split('.')[1],
+            hash=meta.etag,
+            date=meta.last_modified,
         )
 
     def RemoveFile(
@@ -83,13 +91,37 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
         response = self.storage.list_objects(bucket)
         files = [
             file_service_pb2.MetaData(
+                bucket=bucket,
                 filename=obj.object_name.split('.')[0],
-                extension=obj.object_name.split('.')[1]
+                extension=obj.object_name.split('.')[1],
+                hash=obj.etag,
+                # date=obj.last_modified
             )
             for obj in response
         ]
+        print(files)
         return file_service_pb2.FileListResponse(
             files=files
+        )
+
+    @staticmethod
+    def _filename(name: str, ext: str):
+        return f'{name}.{ext}'
+
+    def GetFile(
+            self,
+            request: file_service_pb2.FileRequest,
+            context
+    ) -> file_service_pb2.MetaData:
+        name = self._filename(request.filename, request.extension)
+        meta = self.storage.stat_object(
+            bucket_name=request.bucket,
+            object_name=name
+        )
+        return file_service_pb2.MetaData(
+            **request,
+            hash=meta.etag,
+            date=meta.last_modified
         )
 
 

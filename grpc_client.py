@@ -17,7 +17,8 @@ def run():
         download = stub.DownloadFile(file_service_pb2.MetaData(
             bucket='test',
             filename='code',
-            extension='txt'
+            extension='txt',
+
         )
         )
         # print("Greeter client received: " + response.message)
