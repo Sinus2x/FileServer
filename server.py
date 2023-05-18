@@ -22,10 +22,6 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
 
     @staticmethod
     def _get_minio_client():
-        dotenv_path = './.env'
-        if os.path.exists(dotenv_path):
-            load_dotenv(dotenv_path)
-
         access_key = os.environ.get('MINIO_ACCESS_KEY')
         secret_key = os.environ.get('MINIO_SECRET_KEY')
         return Minio(

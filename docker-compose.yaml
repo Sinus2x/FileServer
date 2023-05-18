@@ -6,6 +6,9 @@ version: '3.7'
 services:
   server:
     build: .
+    environment:
+      MINIO_ACCESS_KEY: "minio"
+      MINIO_SECRET_KEY: "minio124"
     ports:
       - "50051:50051"
     command: python3 server.py
