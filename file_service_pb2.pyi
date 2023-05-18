@@ -1,3 +1,4 @@
+from google.protobuf import timestamp_pb2 as _timestamp_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
@@ -5,13 +6,31 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
-class File(_message.Message):
+class DownloadRequest(_message.Message):
+    __slots__ = ["bucket", "filename"]
+    BUCKET_FIELD_NUMBER: _ClassVar[int]
+    FILENAME_FIELD_NUMBER: _ClassVar[int]
+    bucket: str
+    filename: str
+    def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ...) -> None: ...
+
+class DownloadResponse(_message.Message):
     __slots__ = ["chunk_data", "meta"]
     CHUNK_DATA_FIELD_NUMBER: _ClassVar[int]
     META_FIELD_NUMBER: _ClassVar[int]
     chunk_data: bytes
     meta: MetaData
-    def __init__(self, meta: _Optional[_Union[MetaData, _Mapping]] = ..., chunk_data: _Optional[bytes] = ...) -> None: ...
+    def __init__(self, chunk_data: _Optional[bytes] = ..., meta: _Optional[_Union[MetaData, _Mapping]] = ...) -> None: ...
+
+class File(_message.Message):
+    __slots__ = ["bucket", "chunk_data", "filename"]
+    BUCKET_FIELD_NUMBER: _ClassVar[int]
+    CHUNK_DATA_FIELD_NUMBER: _ClassVar[int]
+    FILENAME_FIELD_NUMBER: _ClassVar[int]
+    bucket: str
+    chunk_data: bytes
+    filename: str
+    def __init__(self, chunk_data: _Optional[bytes] = ..., bucket: _Optional[str] = ..., filename: _Optional[str] = ...) -> None: ...
 
 class FileListRequest(_message.Message):
     __slots__ = ["bucket"]
@@ -25,26 +44,36 @@ class FileListResponse(_message.Message):
     files: _containers.RepeatedCompositeFieldContainer[MetaData]
     def __init__(self, files: _Optional[_Iterable[_Union[MetaData, _Mapping]]] = ...) -> None: ...
 
-class FileRequest(_message.Message):
-    __slots__ = ["bucket", "extension", "filename"]
+class GetFileRequest(_message.Message):
+    __slots__ = ["bucket", "filename"]
     BUCKET_FIELD_NUMBER: _ClassVar[int]
-    EXTENSION_FIELD_NUMBER: _ClassVar[int]
     FILENAME_FIELD_NUMBER: _ClassVar[int]
     bucket: str
-    extension: str
     filename: str
-    def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ..., extension: _Optional[str] = ...) -> None: ...
+    def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ...) -> None: ...
 
 class MetaData(_message.Message):
-    __slots__ = ["bucket", "date", "extension", "filename", "hash"]
+    __slots__ = ["bucket", "date", "filename", "hash", "url"]
     BUCKET_FIELD_NUMBER: _ClassVar[int]
     DATE_FIELD_NUMBER: _ClassVar[int]
-    EXTENSION_FIELD_NUMBER: _ClassVar[int]
     FILENAME_FIELD_NUMBER: _ClassVar[int]
     HASH_FIELD_NUMBER: _ClassVar[int]
+    URL_FIELD_NUMBER: _ClassVar[int]
     bucket: str
-    date: str
-    extension: str
+    date: _timestamp_pb2.Timestamp
     filename: str
     hash: str
-    def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ..., extension: _Optional[str] = ..., hash: _Optional[str] = ..., date: _Optional[str] = ...) -> None: ...
+    url: str
+    def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ..., hash: _Optional[str] = ..., date: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., url: _Optional[str] = ...) -> None: ...
+
+class RemoveFileRequest(_message.Message):
+    __slots__ = ["bucket", "filename"]
+    BUCKET_FIELD_NUMBER: _ClassVar[int]
+    FILENAME_FIELD_NUMBER: _ClassVar[int]
+    bucket: str
+    filename: str
+    def __init__(self, bucket: _Optional[str] = ..., filename: _Optional[str] = ...) -> None: ...
+
+class RemoveFileResponse(_message.Message):
+    __slots__ = []
+    def __init__(self) -> None: ...

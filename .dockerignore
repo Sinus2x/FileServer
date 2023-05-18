@@ -1,0 +1,11 @@
+.gitignore
+.idea
+.git
+__pycache__
+venv
+docker-compose.yaml
+*.txt
+!requirements.txt
+*.proto
+nginx.conf
+grpc_client.py

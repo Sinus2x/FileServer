@@ -1,14 +1,19 @@
 import io
 
 import file_service_pb2_grpc
-import file_service_pb2
-from concurrent import futures
 import logging
 import grpc
 import os
 
+from datetime import datetime
+from file_service_pb2 import *
+from google.protobuf.timestamp_pb2 import Timestamp
+
+from concurrent import futures
+from minio.datatypes import Object
 from dotenv import load_dotenv
 from minio import Minio
+from minio.error import S3Error, InvalidResponseError, ServerError
 
 
 class Servicer(file_service_pb2_grpc.GreeterServicer):
@@ -17,13 +22,12 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
 
     @staticmethod
     def _get_minio_client():
-        dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
+        dotenv_path = './.env'
         if os.path.exists(dotenv_path):
             load_dotenv(dotenv_path)
 
         access_key = os.environ.get('MINIO_ACCESS_KEY')
         secret_key = os.environ.get('MINIO_SECRET_KEY')
-
         return Minio(
             'localhost:9000',
             access_key=access_key,
@@ -31,98 +35,151 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
             secure=False
         )
 
+    @staticmethod
+    def _to_timestamp(dt: datetime) -> Timestamp:
+        timestamp = Timestamp()
+        timestamp.FromDatetime(dt)
+        return timestamp
+
+    @staticmethod
+    def _read_bytes(chunk_data):
+        data = io.BytesIO(chunk_data)
+        return data, data.getbuffer().nbytes
+
+    @classmethod
+    def _meta_from_stat(cls, stat: Object):
+        return MetaData(
+            bucket=stat.bucket_name,
+            filename=stat.object_name,
+            hash=stat.etag,
+            date=cls._to_timestamp(stat.last_modified)
+        )
+
+    def _check_bucket(self, bucket: str) -> None:
+        if self.storage.bucket_exists(bucket):
+            return
+        self.storage.make_bucket(bucket)
+
     def DownloadFile(
             self,
-            request: file_service_pb2.MetaData,
+            request: DownloadRequest,
             context=None
-    ) -> file_service_pb2.File:
-        data = self.storage.get_object(
-            bucket_name=request.bucket,
-            object_name=f'{request.filename}.{request.extension}'
-        )
-        return file_service_pb2.File(
-            chunk_data=data.read(),
-            # meta=request
-        )
+    ) -> DownloadResponse:
+        self._check_bucket(request.bucket)
+        try:
+            data = self.storage.get_object(
+                bucket_name=request.bucket,
+                object_name=request.filename
+            )
+            stat = self.storage.stat_object(
+                bucket_name=request.bucket,
+                object_name=request.filename
+            )
+            return DownloadResponse(
+                chunk_data=data.read(),
+                meta=self._meta_from_stat(stat)
+            )
+        except S3Error as e:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(e.message)
+            return DownloadResponse()
+        except InvalidResponseError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return DownloadResponse()
+        except ServerError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return DownloadResponse()
 
     def UploadFile(
             self,
-            request: file_service_pb2.File,
+            request: File,
             context=None
-    ) -> file_service_pb2.MetaData:
-        data = io.BytesIO(request.chunk_data)
-        result = self.storage.put_object(
-            bucket_name=request.meta.bucket,
-            object_name=f'{request.meta.filename}.{request.meta.extension}',
+    ) -> MetaData:
+        self._check_bucket(request.bucket)
+        data, length = self._read_bytes(request.chunk_data)
+        self.storage.put_object(
+            bucket_name=request.bucket,
+            object_name=request.filename,
             data=data,
-            length=data.getbuffer().nbytes
+            length=length
         )
-        meta = self.storage.stat_object(
-            bucket_name=request.meta.bucket,
-            object_name=f'{request.meta.filename}.{request.meta.extension}'
+        stat = self.storage.stat_object(
+            bucket_name=request.bucket,
+            object_name=request.filename
         )
-        print(meta.last_modified)
-
-        return file_service_pb2.MetaData(
-            bucket=result.bucket_name,
-            filename=result.object_name.split('.')[0],
-            extension=result.object_name.split('.')[1],
-            hash=meta.etag,
-            date=meta.last_modified,
-        )
+        return self._meta_from_stat(stat)
 
     def RemoveFile(
             self,
-            request: file_service_pb2.MetaData,
+            request: MetaData,
             context=None
-    ) -> file_service_pb2.MetaData:
-        bucket = request.bucket
-        name = request.filename
-        ext = request.extension
-        self.storage.remove_object(bucket, f'{name}.{ext}')
-        return request
+    ) -> RemoveFileResponse:
+        self._check_bucket(request.bucket)
+        try:
+            self.storage.remove_object(
+                bucket_name=request.bucket,
+                object_name=request.filename
+            )
+            return RemoveFileResponse()
+        except InvalidResponseError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return RemoveFileResponse()
+        except ServerError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return RemoveFileResponse()
 
     def GetFileList(
             self,
-            request: file_service_pb2.FileListRequest,
+            request: FileListRequest,
             context=None
-    ) -> file_service_pb2.FileListResponse:
-        bucket = request.bucket
-        response = self.storage.list_objects(bucket)
-        files = [
-            file_service_pb2.MetaData(
-                bucket=bucket,
-                filename=obj.object_name.split('.')[0],
-                extension=obj.object_name.split('.')[1],
-                hash=obj.etag,
-                # date=obj.last_modified
+    ) -> FileListResponse:
+        self._check_bucket(request.bucket)
+        try:
+            response = self.storage.list_objects(request.bucket)
+            files = [
+                self._meta_from_stat(obj)
+                for obj in response
+            ]
+            return FileListResponse(
+                files=files
             )
-            for obj in response
-        ]
-        print(files)
-        return file_service_pb2.FileListResponse(
-            files=files
-        )
-
-    @staticmethod
-    def _filename(name: str, ext: str):
-        return f'{name}.{ext}'
+        except InvalidResponseError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return FileListResponse()
+        except ServerError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return FileListResponse()
 
     def GetFile(
             self,
-            request: file_service_pb2.FileRequest,
-            context
-    ) -> file_service_pb2.MetaData:
-        name = self._filename(request.filename, request.extension)
-        meta = self.storage.stat_object(
-            bucket_name=request.bucket,
-            object_name=name
-        )
-        return file_service_pb2.MetaData(
-            **request,
-            hash=meta.etag,
-            date=meta.last_modified
-        )
+            request: GetFileRequest,
+            context=None
+    ) -> MetaData:
+        self._check_bucket(request.bucket)
+        try:
+            stat = self.storage.stat_object(
+                bucket_name=request.bucket,
+                object_name=request.filename
+            )
+            return self._meta_from_stat(stat)
+        except S3Error as e:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(e.message)
+            return MetaData()
+        except InvalidResponseError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return MetaData()
+        except ServerError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return MetaData()
 
 
 def serve():

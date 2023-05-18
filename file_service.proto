@@ -1,39 +1,53 @@
 // python -m grpc_tools.protoc --python_out=. --pyi_out=. --grpc_python_out=. -I./ file_service.proto
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 // The greeting service definition.
 service Greeter {
   // Sends a greeting
   // Uploads a file
   rpc UploadFile(File) returns (MetaData) {}
   // Downloads a file
-  rpc DownloadFile(MetaData) returns  (File) {}
+  rpc DownloadFile(DownloadRequest) returns  (DownloadResponse) {}
 
-  rpc RemoveFile(MetaData) returns (MetaData) {}
+  rpc RemoveFile(RemoveFileRequest) returns (RemoveFileResponse) {}
 
   rpc GetFileList(FileListRequest) returns (FileListResponse) {}
 
-  rpc GetFile(FileRequest) returns (MetaData) {}
+  rpc GetFile(GetFileRequest) returns (MetaData) {}
 }
-
 
 message File {
-  optional MetaData meta = 1;
-  bytes chunk_data = 2;
+  bytes chunk_data = 1;
+  string bucket = 2;
+  string filename = 3;
 }
 
-message FileRequest {
+message DownloadRequest {
   string bucket = 1;
   string filename = 2;
-  string extension = 3;
+}
+
+message DownloadResponse {
+  bytes chunk_data = 1;
+  MetaData meta = 2;
+}
+
+message RemoveFileRequest {
+  string bucket = 1;
+  string filename = 2;
+}
+
+message RemoveFileResponse {
 }
 
 message MetaData {
-  optional string bucket = 1;
+  string bucket = 1;
   string filename = 2;
-  string extension = 3;
-  optional string hash = 4;
-  optional string date = 5;
+  string hash = 3;
+  google.protobuf.Timestamp date = 4;
+  string url = 5;
 }
 
 message FileListRequest {
@@ -42,4 +56,9 @@ message FileListRequest {
 
 message FileListResponse {
   repeated MetaData files = 1;
+}
+
+message GetFileRequest {
+  string bucket = 1;
+  string filename = 2;
 }

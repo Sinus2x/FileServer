@@ -16,37 +16,32 @@ def run():
         stub = file_service_pb2_grpc.GreeterStub(channel)
         download = stub.DownloadFile(file_service_pb2.MetaData(
             bucket='test',
-            filename='code',
-            extension='txt',
-
+            filename='code.txt'
         )
         )
+        print(download.meta.date.ToDatetime())
         # print("Greeter client received: " + response.message)
         with open('download_response1.txt', 'wb') as f:
             f.write(download.chunk_data)
 
 
-        # with open('test.txt', 'rb') as f:
-        #     upload = stub.UploadFile(
-        #         file_service_pb2.File(
-        #             chunk_data=f.read(),
-        #             meta=file_service_pb2.MetaData(
-        #                 filename='test',
-        #                 extension='txt',
-        #                 bucket='test'
-        #             )
-        #         )
-        #     )
-        # print(upload)
+        with open('test.txt', 'rb') as f:
+            upload = stub.UploadFile(
+                file_service_pb2.File(
+                    chunk_data=f.read(),
+                    filename='test.txt',
+                    bucket='test',
+                )
+            )
+        print(upload)
 
-        # rm = stub.RemoveFile(
-        #     file_service_pb2.MetaData(
-        #         bucket='test',
-        #         filename='test',
-        #         extension='txt'
-        #     )
-        # )
-        # print(rm)
+        rm = stub.RemoveFile(
+            file_service_pb2.RemoveFileRequest(
+                bucket='test',
+                filename='testtxt'
+            )
+        )
+        print(rm)
 
         files = stub.GetFileList(
             file_service_pb2.FileListRequest(
@@ -55,6 +50,13 @@ def run():
         )
         print(files.files)
 
+        file = stub.GetFile(
+            file_service_pb2.GetFileRequest(
+                bucket='test',
+                filename='code.txt'
+            )
+        )
+        print(file)
 
 if __name__ == '__main__':
     logging.basicConfig()

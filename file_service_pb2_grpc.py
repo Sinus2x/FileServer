@@ -22,13 +22,13 @@ class GreeterStub(object):
                 )
         self.DownloadFile = channel.unary_unary(
                 '/Greeter/DownloadFile',
-                request_serializer=file__service__pb2.MetaData.SerializeToString,
-                response_deserializer=file__service__pb2.File.FromString,
+                request_serializer=file__service__pb2.DownloadRequest.SerializeToString,
+                response_deserializer=file__service__pb2.DownloadResponse.FromString,
                 )
         self.RemoveFile = channel.unary_unary(
                 '/Greeter/RemoveFile',
-                request_serializer=file__service__pb2.MetaData.SerializeToString,
-                response_deserializer=file__service__pb2.MetaData.FromString,
+                request_serializer=file__service__pb2.RemoveFileRequest.SerializeToString,
+                response_deserializer=file__service__pb2.RemoveFileResponse.FromString,
                 )
         self.GetFileList = channel.unary_unary(
                 '/Greeter/GetFileList',
@@ -37,7 +37,7 @@ class GreeterStub(object):
                 )
         self.GetFile = channel.unary_unary(
                 '/Greeter/GetFile',
-                request_serializer=file__service__pb2.FileRequest.SerializeToString,
+                request_serializer=file__service__pb2.GetFileRequest.SerializeToString,
                 response_deserializer=file__service__pb2.MetaData.FromString,
                 )
 
@@ -89,13 +89,13 @@ def add_GreeterServicer_to_server(servicer, server):
             ),
             'DownloadFile': grpc.unary_unary_rpc_method_handler(
                     servicer.DownloadFile,
-                    request_deserializer=file__service__pb2.MetaData.FromString,
-                    response_serializer=file__service__pb2.File.SerializeToString,
+                    request_deserializer=file__service__pb2.DownloadRequest.FromString,
+                    response_serializer=file__service__pb2.DownloadResponse.SerializeToString,
             ),
             'RemoveFile': grpc.unary_unary_rpc_method_handler(
                     servicer.RemoveFile,
-                    request_deserializer=file__service__pb2.MetaData.FromString,
-                    response_serializer=file__service__pb2.MetaData.SerializeToString,
+                    request_deserializer=file__service__pb2.RemoveFileRequest.FromString,
+                    response_serializer=file__service__pb2.RemoveFileResponse.SerializeToString,
             ),
             'GetFileList': grpc.unary_unary_rpc_method_handler(
                     servicer.GetFileList,
@@ -104,7 +104,7 @@ def add_GreeterServicer_to_server(servicer, server):
             ),
             'GetFile': grpc.unary_unary_rpc_method_handler(
                     servicer.GetFile,
-                    request_deserializer=file__service__pb2.FileRequest.FromString,
+                    request_deserializer=file__service__pb2.GetFileRequest.FromString,
                     response_serializer=file__service__pb2.MetaData.SerializeToString,
             ),
     }
@@ -147,8 +147,8 @@ class Greeter(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Greeter/DownloadFile',
-            file__service__pb2.MetaData.SerializeToString,
-            file__service__pb2.File.FromString,
+            file__service__pb2.DownloadRequest.SerializeToString,
+            file__service__pb2.DownloadResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -164,8 +164,8 @@ class Greeter(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Greeter/RemoveFile',
-            file__service__pb2.MetaData.SerializeToString,
-            file__service__pb2.MetaData.FromString,
+            file__service__pb2.RemoveFileRequest.SerializeToString,
+            file__service__pb2.RemoveFileResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -198,7 +198,7 @@ class Greeter(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Greeter/GetFile',
-            file__service__pb2.FileRequest.SerializeToString,
+            file__service__pb2.GetFileRequest.SerializeToString,
             file__service__pb2.MetaData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
