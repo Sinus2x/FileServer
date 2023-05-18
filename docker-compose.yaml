@@ -1,83 +1,50 @@
 #sudo chmod 666 /var/run/docker.sock
 version: '3.7'
-
-
-# Settings and configurations that are common for all containers
-x-minio-common: &minio-common
-  image: quay.io/minio/minio:RELEASE.2023-02-27T18-10-45Z
-  command: server --console-address ":9001" http://minio{1...4}/data{1...2}
-  expose:
-    - "9000"
-    - "9001"
-  environment:
-    MINIO_ROOT_USER: minioadmin
-    MINIO_ROOT_PASSWORD: minioadmin
-#  environment: # env конфигурация, подробнее: https://github.com/KaymeKaydex/web-2022/tree/go-lab2/tutorials/lab2/golang#поговорим-про-переменные-окружения
-
-  healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-    interval: 30s
-    timeout: 20s
-    retries: 3
-
 # starts 4 docker containers running minio server instances.
 # using nginx reverse proxy, load balancing, you can access
 # it through port 9000.
 services:
-  minio1:
-    <<: *minio-common
-    hostname: minio1
-    volumes:
-      - data1-1:/data1
-      - data1-2:/data2
-
-  minio2:
-    <<: *minio-common
-    hostname: minio2
-    volumes:
-      - data2-1:/data1
-      - data2-2:/data2
-
-  minio3:
-    <<: *minio-common
-    hostname: minio3
-    volumes:
-      - data3-1:/data1
-      - data3-2:/data2
-
-  minio4:
-    <<: *minio-common
-    hostname: minio4
-    volumes:
-      - data4-1:/data1
-      - data4-2:/data2
-
-  nginx:
-    image: nginx:1.19.2-alpine
-    hostname: nginx
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  server:
+    build: .
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "50051:50051"
+    command: python3 server.py
+    network_mode: host
+#    networks:
+#      - net
     depends_on:
-      - minio1
-      - minio2
-      - minio3
-      - minio4
+      - minio
 
-## By default this config uses default local driver,
-## For custom volumes replace with volume driver configuration.
+  minio:
+     image: minio/minio:latest
+     command: server --console-address ":9001" /data/
+     ports:
+       - "9000:9000"
+       - "9001:9001"
+     environment:
+       MINIO_ROOT_USER: minioadmin
+       MINIO_ROOT_PASSWORD: minioadmin
+     volumes:
+       - minio-storage:/data
+     healthcheck:
+       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+       interval: 30s
+       timeout: 20s
+       retries: 3
+     network_mode: host
+#     networks:
+#       - net
+
 volumes:
-  data1-1:
-  data1-2:
-  data2-1:
-  data2-2:
-  data3-1:
-  data3-2:
-  data4-1:
-  data4-2:
-#  db:
-#    driver: local
-#  redis-data:
-#  redis-conf:
+ minio-storage:
+
+#networks:
+#  net:
+#    driver: bridge
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: "172.20.0.0/16"
+#        - gateway: "172.20.0.1"
+
+

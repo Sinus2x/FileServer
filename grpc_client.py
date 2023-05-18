@@ -14,22 +14,21 @@ def run():
     print("Will try to greet world ...")
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = file_service_pb2_grpc.GreeterStub(channel)
-        download = stub.DownloadFile(file_service_pb2.MetaData(
-            bucket='test',
-            filename='code.txt'
-        )
-        )
-        print(download.meta.date.ToDatetime())
-        # print("Greeter client received: " + response.message)
-        with open('download_response1.txt', 'wb') as f:
-            f.write(download.chunk_data)
+        # download = stub.DownloadFile(file_service_pb2.MetaData(
+        #     bucket='test',
+        #     filename='code.txt'
+        # )
+        # )
+        # print(download.meta.date.ToDatetime())
+        # # print("Greeter client received: " + response.message)
+        # with open('download_response1.txt', 'wb') as f:
+        #     f.write(download.chunk_data)
 
-
-        with open('test.txt', 'rb') as f:
+        with open('requirements.txt', 'rb') as f:
             upload = stub.UploadFile(
                 file_service_pb2.File(
                     chunk_data=f.read(),
-                    filename='test.txt',
+                    filename='req.txt',
                     bucket='test',
                 )
             )
@@ -57,6 +56,7 @@ def run():
             )
         )
         print(file)
+
 
 if __name__ == '__main__':
     logging.basicConfig()

@@ -29,7 +29,7 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
         access_key = os.environ.get('MINIO_ACCESS_KEY')
         secret_key = os.environ.get('MINIO_SECRET_KEY')
         return Minio(
-            'localhost:9000',
+            '172.20.0.3:9000',
             access_key=access_key,
             secret_key=secret_key,
             secure=False
