@@ -11,7 +11,6 @@ from google.protobuf.timestamp_pb2 import Timestamp
 
 from concurrent import futures
 from minio.datatypes import Object
-from dotenv import load_dotenv
 from minio import Minio
 from minio.error import S3Error, InvalidResponseError, ServerError
 
