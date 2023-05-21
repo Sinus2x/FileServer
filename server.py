@@ -1,5 +1,5 @@
 import io
-
+from minio.tagging import Tags
 import file_service_pb2_grpc
 import logging
 import grpc
@@ -21,8 +21,8 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
 
     @staticmethod
     def _get_minio_client():
-        access_key = os.environ.get('MINIO_ACCESS_KEY')
-        secret_key = os.environ.get('MINIO_SECRET_KEY')
+        access_key = 'minioadmin'
+        secret_key = 'minioadmin'
         return Minio(
             'localhost:9000',
             access_key=access_key,
@@ -41,13 +41,21 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
         data = io.BytesIO(chunk_data)
         return data, data.getbuffer().nbytes
 
-    @classmethod
-    def _meta_from_stat(cls, stat: Object):
+    def stat_object(self, bucket_name: str, object_name: str) -> MetaData:
+        tags = self.storage.get_object_tags(
+            bucket_name=bucket_name,
+            object_name=object_name
+        )
+        stat = self.storage.stat_object(
+            bucket_name=bucket_name,
+            object_name=object_name
+        )
         return MetaData(
             bucket=stat.bucket_name,
             filename=stat.object_name,
             hash=stat.etag,
-            date=cls._to_timestamp(stat.last_modified)
+            last_modified=tags['date'],
+            size=stat.size
         )
 
     def _check_bucket(self, bucket: str) -> None:
@@ -66,13 +74,13 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
                 bucket_name=request.bucket,
                 object_name=request.filename
             )
-            stat = self.storage.stat_object(
+            stat = self.stat_object(
                 bucket_name=request.bucket,
                 object_name=request.filename
             )
             return DownloadResponse(
                 chunk_data=data.read(),
-                meta=self._meta_from_stat(stat)
+                meta=stat
             )
         except S3Error as e:
             context.set_code(grpc.StatusCode.NOT_FOUND)
@@ -94,17 +102,20 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
     ) -> MetaData:
         self._check_bucket(request.bucket)
         data, length = self._read_bytes(request.chunk_data)
+        tags = Tags(for_object=True)
+        tags['date'] = request.last_modified
         self.storage.put_object(
             bucket_name=request.bucket,
             object_name=request.filename,
             data=data,
-            length=length
+            length=length,
+            tags=tags
         )
-        stat = self.storage.stat_object(
+        stat = self.stat_object(
             bucket_name=request.bucket,
             object_name=request.filename
         )
-        return self._meta_from_stat(stat)
+        return stat
 
     def RemoveFile(
             self,
@@ -136,7 +147,7 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
         try:
             response = self.storage.list_objects(request.bucket)
             files = [
-                self._meta_from_stat(obj)
+                self.stat_object(bucket_name=request.bucket, object_name=obj.object_name)
                 for obj in response
             ]
             return FileListResponse(
@@ -158,11 +169,11 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
     ) -> MetaData:
         self._check_bucket(request.bucket)
         try:
-            stat = self.storage.stat_object(
+            stat = self.stat_object(
                 bucket_name=request.bucket,
                 object_name=request.filename
             )
-            return self._meta_from_stat(stat)
+            return stat
         except S3Error as e:
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details(e.message)
