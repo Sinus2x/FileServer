@@ -46,6 +46,7 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
             bucket_name=bucket_name,
             object_name=object_name
         )
+        print(object_name, tags)
         stat = self.storage.stat_object(
             bucket_name=bucket_name,
             object_name=object_name

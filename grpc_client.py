@@ -14,12 +14,11 @@ def run():
     print("Will try to greet world ...")
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = file_service_pb2_grpc.GreeterStub(channel)
-        # download = stub.DownloadFile(file_service_pb2.MetaData(
-        #     bucket='test',
-        #     filename='code.txt'
-        # )
-        # )
-        # print(download.meta.date.ToDatetime())
+        download = stub.DownloadFile(file_service_pb2.MetaData(
+            bucket='test',
+            filename='code.txt'
+        )
+        )
         # # print("Greeter client received: " + response.message)
         # with open('download_response1.txt', 'wb') as f:
         #     f.write(download.chunk_data)

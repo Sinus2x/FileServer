@@ -8,4 +8,4 @@ docker-compose.yaml
 !requirements.txt
 *.proto
 nginx.conf
-grpc_client.py
+#grpc_client.py
