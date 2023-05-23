@@ -1,8 +1,6 @@
 // python -m grpc_tools.protoc --python_out=. --pyi_out=. --grpc_python_out=. -I./ file_service.proto
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-
 // The greeting service definition.
 service Greeter {
   // Sends a greeting
@@ -23,6 +21,7 @@ message File {
   string bucket = 2;
   string filename = 3;
   string last_modified = 4;
+  string content_type = 5;
 }
 
 message DownloadRequest {
@@ -49,6 +48,8 @@ message MetaData {
   string hash = 3;
   string last_modified = 4;
   float size = 5;
+  string content_type = 6;
+
 }
 
 message FileListRequest {

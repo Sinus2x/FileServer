@@ -54,8 +54,9 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
             bucket=stat.bucket_name,
             filename=stat.object_name,
             hash=stat.etag,
-            last_modified=tags['date'],
-            size=stat.size
+            last_modified=tags.get('date'),
+            size=stat.size,
+            content_type=stat.content_type
         )
 
     def _check_bucket(self, bucket: str) -> None:
@@ -109,6 +110,7 @@ class Servicer(file_service_pb2_grpc.GreeterServicer):
             object_name=request.filename,
             data=data,
             length=length,
+            content_type=request.content_type,
             tags=tags
         )
         stat = self.stat_object(
