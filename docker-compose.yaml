@@ -17,16 +17,6 @@ x-minio-common: &minio-common
     retries: 3
 
 services:
-  server:
-    build: .
-    environment:
-      MINIO_ACCESS_KEY: "minioadmin"
-      MINIO_SECRET_KEY: "minioadmin"
-    ports:
-      - "50051:50051"
-    command: python3 server.py
-    network_mode: host
-
   # Settings and configurations that are common for all containers
 
   # starts 4 docker containers running minio server instances.
