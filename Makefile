@@ -1,10 +1,10 @@
-IMAGE := server
 minio:
 	@docker compose up
-server:
+venv:
 	python3 -m venv env
 	sh ./env/bin/activate
 	pip install -r requirements.txt
+server:
 	python3 server.py
 
 code:
